@@ -20,9 +20,10 @@ module Resque
             subscribers = Exchange.redis.smembers("#{topic}_subscribers")
             subscribers.each do |s|
               sinfo = JSON.parse(s)
-              Resque.logger.info "[resque-pubsub.broker] distributing to #{sinfo.inspect}"
+              klass = sinfo['class']
+              Resque.logger.info "fanout to #{klass}"
               Broker.redis.sadd("#{sinfo['namespace']}:queues", "fanout:#{topic}")
-              Broker.redis.rpush("#{sinfo['namespace']}:queue:fanout:#{topic}", { :class => sinfo['class'], :args => [message] }.to_json)
+              Broker.redis.rpush("#{sinfo['namespace']}:queue:fanout:#{topic}", { :class => klass, :args => [message] }.to_json)
             end
           end
 

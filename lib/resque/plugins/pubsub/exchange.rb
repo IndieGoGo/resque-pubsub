@@ -15,8 +15,10 @@ module Resque
           end
 
           def perform(subscription_info)
-            Resque.logger.info "[resque-pubsub.exchange] handling subscription #{subscription_info.inspect}"
-            Exchange.redis.sadd("#{subscription_info["topic"]}_subscribers", { :class => subscription_info['class'], :namespace => subscription_info['namespace'] }.to_json)
+            klass = subscription_info['class']
+            topic = subscription_info['topic']
+            Resque.logger.info "subscribe topic=#{topic} job=#{klass}"
+            Exchange.redis.sadd("#{topic}_subscribers", { :class => klass, :namespace => subscription_info['namespace'] }.to_json)
           end
 
           def pubsub_namespace
